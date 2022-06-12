@@ -11,8 +11,10 @@ export class AppComponent {
   widgetModel:  any = {};
   
   async search(city: string, bank: string) {
-    if(city ==='bratislava' && bank == "cib") bank = 'vub';
-    let data = await new DataFetcher().fetchData(bank, city);
+    let dataFetcher: DataFetcher;
+    if(bank == "cib") dataFetcher = new CIBFetcher(city);
+    else dataFetcher = new BankFetcher(bank, city);
+    let data = await dataFetcher.fetchData();
     let apiResult = data[0];
     let viewModel = new Presenter(apiResult).viewModel;
     this.terminalModel = {
@@ -53,7 +55,7 @@ export interface ViewModel {
 export class Bank {
   bankIconURL: string;
   countryIconURL: string;
-  constructor(country_code: string, bankname: string){
+  constructor(country_code: string){
     this.bankIconURL = "https://icon-library.com/images/bank-icon-vector/bank-icon-vector-8.jpg";
     switch (country_code) {
       case 'sk':
@@ -65,33 +67,36 @@ export class Bank {
       default:
         this.countryIconURL = "https://banner2.cleanpng.com/20180410/bvw/kisspng-computer-icons-globe-world-clip-art-globe-5acd31f76797c0.3831539515233971114243.jpg";
     };
-    switch (bankname) {
-      case 'OTP Bank':
-        this.bankIconURL = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Otp_bank_Logo.svg/345px-Otp_bank_Logo.svg.png";
-        break;
-      case 'OTP banka':
-        this.bankIconURL = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Otp_bank_Logo.svg/345px-Otp_bank_Logo.svg.png";
-        break;
-      case 'CIB Bank':
-        this.bankIconURL = "https://www.szamlazz.hu/wp-content/uploads/2021/05/cib_300x200.png";
-        break;
-      case 'Všeobecná úverová banka':
-        this.bankIconURL = "https://giffy.cz/img/loga/vub_banka.png";
-        break;
-      default:
-        throw new Error('Unknown Bank Type');
-    }
   }
 }
 
-export class DataFetcher {
+export class OTP extends Bank {
+  constructor(country_code: string) {
+    super(country_code);
+    this.bankIconURL = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Otp_bank_Logo.svg/345px-Otp_bank_Logo.svg.png";
+  }
+}
+
+export class CIB extends Bank {
+  constructor(country_code: string) {
+    super(country_code);
+    if(country_code === 'hu')
+      this.bankIconURL = "https://www.szamlazz.hu/wp-content/uploads/2021/05/cib_300x200.png";
+    else if (country_code === 'sk')
+      this.bankIconURL = "https://giffy.cz/img/loga/vub_banka.png";
+  }
+}
+
+
+export abstract class DataFetcher {
   url = "https://nominatim.openstreetmap.org/search?format=json&type=bank&addressdetails=1";
-  constructor() { 
+  query = "";
+  constructor(query:string) {
+    this.query = query;
   }
 
-  fetchData(bankname: string, cityname: string): Promise<Array<IAPIResult>> {
-    let query = `q='${bankname},${cityname}`;
-    return fetch(this.url + '&' + query)
+  fetchData(): Promise<Array<IAPIResult>> {
+    return fetch(this.url + '&' + this.query)
       .then(response => {
         if (!response.ok) {
           throw new Error(response.statusText);
@@ -101,6 +106,20 @@ export class DataFetcher {
   }
 }
 
+export class BankFetcher extends DataFetcher {
+  constructor(bankname: string, cityname: string) {
+    super(`q='${bankname},${cityname}`);
+  }
+}
+
+export class CIBFetcher extends BankFetcher {
+  constructor(cityname: string) {
+    if(cityname ==='bratislava') super('vub', cityname);
+    else super('cib', cityname);
+  }
+}
+
+
 export class Presenter {
   viewModel: ViewModel;
   constructor(apiResult: IAPIResult) {
@@ -108,7 +127,18 @@ export class Presenter {
   }
   mapAPIResultToModel(apiResult: IAPIResult): ViewModel {
     let bankname = apiResult.address.amenity;
-    let bank = new Bank(apiResult.address.country_code, bankname);
+    let bank: Bank;
+    switch (bankname) {
+      case 'OTP Bank' || 'OTP Banka':
+        bank = new OTP(apiResult.address.country_code);
+        break;
+      case 'CIB Bank' || 'Všeobecná úverová banka':
+        bank = new CIB(apiResult.address.country_code);
+        break;
+      default:
+        throw new Error('Unknown Bank Type');
+    }
+
     return {
       bank: apiResult.address.amenity,
       country: apiResult.address.country,

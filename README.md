@@ -31,3 +31,10 @@ Amire a jövőben számítani lehet, hogy változni fog:
 1. Feladat: Single Responsibility Principle
 - Kik az aktorok, akiktől jöhetnek a változtatási kérések? CTO és UX Team.
 - Ezek szerint érdemes szétválasztani a prezentációs és az adatlekérési logikát. (Presenter, DataFetcher)
+
+2. Feladat: Open-Closed Principle
+- Mi van, ha új bankot kell hozzáadni a rendszerhez? Jelenleg bele kellene nyúlni a Bank osztályba.
+- Örökléssel oldjuk meg, hogy bank hozzáadásra nyitott legyen a rendszer. Javasolt a Bank osztályból OTP és CIB osztályokat származtatni, amik tudják kezelni azt, hogy az adott banknál milyen bank logót, országlogót és banknevet írjunk ki.
+- Szintén vezessünk be öröklést a Bank fetchelésre (BankFetcher), amiből a CIB-es kivételkezelést (CIBFetcher osztály) leszármaztatjuk.
+- A DataFetcher is osztályt próbáljuk egy általános abtract osztályt készíteni, ha esetleg más query-t kell használni később, nem csak a bank, city jellegűt, akkor ebből is tudjunk más Fetcher osztályokat származtatni.
+- A jövőben bármilyen új bank jön, akkor tudjuk a BankFetcher osztályunkat használni, vagy pedig a CIBFetcher-hez hasonló kivételkezelést készíteni.

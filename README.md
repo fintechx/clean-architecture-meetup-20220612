@@ -47,3 +47,6 @@ Amire a jövőben számítani lehet, hogy változni fog:
 - Válasszuk szét a viewModel interfészt is terminalModel és widgetModel interfészekre és csak a számukra releváns mezőket hagyjuk meg.
 - Készítsünk egy TerminalPresenter és egy WidgetPresenter osztályt, úgy hogy a korábbi Presenter osztályt tartsuk meg absztrakt osztályként, a mapAPIResultToModel függvényét absztrakt függvényként. A TerminalPresenter és a WidgetPresenter osztályok tárolják a saját adataikat egy-egy saját viewModel mezőben, ezeken végezzenek műveleteket.
 
+5. Feladat: Dependency Inversion Principle
+- Ne hivatkozzunk konkrét, változékony osztályokra pl Presenter, BankFetcher, CIBFetcher.
+- Ehhez tudjuk használni a Factory pattern-t. Ezáltal az App komponensünk már csak egy-egy Presenter és BankFetcher osztályokat előállító factory-ra fog hivatkozni.

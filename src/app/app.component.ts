@@ -11,13 +11,12 @@ export class AppComponent {
   widgetModel:  any = {};
   
   async search(city: string, bank: string) {
-    let dataFetcher: DataFetcher;
-    if(bank == "cib") dataFetcher = new CIBFetcher(city);
-    else dataFetcher = new BankFetcher(bank, city);
-    let data = await dataFetcher.fetchData();
-    let apiResult = data[0];
-    this.terminalModel = new TerminalPresenter(apiResult).viewModel;
-    this.widgetModel = new WidgetPresenter(apiResult).viewModel;
+    let bankFetcher = BankFetcherFactory.createDataFetcher(bank, city);
+    let results = await bankFetcher.fetchData();
+    let terminal = PresenterFactory.createPresenter('terminal', results[0]);
+    let widget = PresenterFactory.createPresenter('widget', results[0]);
+    this.terminalModel = terminal.viewModel;
+    this.widgetModel = widget.viewModel;
   }
 }
 
@@ -118,6 +117,19 @@ export abstract class Presenter {
   abstract mapAPIResultToModel(apiResult: IAPIResult): any;
 }
 
+export class PresenterFactory {
+  static createPresenter(presenterType: string, apiResult: IAPIResult): Presenter {
+    switch (presenterType) {
+      case 'terminal':
+        return new TerminalPresenter(apiResult);
+      case 'widget':
+        return new WidgetPresenter(apiResult);
+      default:
+        throw new Error('Unknown Presenter Type');
+    }
+  }
+}
+
 export interface TerminalModel {
     bank: string,
     country: string,
@@ -165,5 +177,13 @@ export class WidgetPresenter extends Presenter {
     } as WidgetModel;
   }
 }
+
+export class BankFetcherFactory {
+  static createDataFetcher(bankname: string, cityname: string) {
+    if(bankname == "cib") return new CIBFetcher(cityname);
+    else return new BankFetcher(bankname, cityname);
+  }
+}
+
 
 

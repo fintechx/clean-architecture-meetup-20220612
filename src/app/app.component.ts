@@ -12,19 +12,9 @@ export class AppComponent {
   
   async search(city: string, bank: string) {
     if(city ==='bratislava' && bank == "cib") bank = 'vub';
-    let data = await this.fetchData(bank, city);
+    let data = await new DataFetcher().fetchData(bank, city);
     let apiResult = data[0];
-    let bankname = apiResult.address.amenity;
-    let bankObj = new Bank(apiResult.address.country_code, bankname);
-    let viewModel = {
-      bank: apiResult.address.amenity,
-      country: apiResult.address.country,
-      city: apiResult.address.city,
-      road: apiResult.address.road,
-      bankIconURL: bankObj.bankIconURL,
-      countryIconURL: bankObj.countryIconURL,
-      display_name: apiResult.display_name
-    } as ViewModel;
+    let viewModel = new Presenter(apiResult).viewModel;
     this.terminalModel = {
       bank: viewModel.bank,
       country: viewModel.country,
@@ -36,18 +26,6 @@ export class AppComponent {
       countryIconURL: viewModel.countryIconURL,
       display_name: viewModel.display_name
     };
-  }
-
-  url = "https://nominatim.openstreetmap.org/search?format=json&type=bank&addressdetails=1";
-  fetchData(bankname: string, cityname: string): Promise<Array<IAPIResult>> {
-    let query = `q='${bankname},${cityname}`;
-    return fetch(this.url + '&' + query)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(response.statusText);
-        }
-        return response.json() as Promise<Array<IAPIResult>>;
-      });
   }
 }
 
@@ -105,3 +83,41 @@ export class Bank {
     }
   }
 }
+
+export class DataFetcher {
+  url = "https://nominatim.openstreetmap.org/search?format=json&type=bank&addressdetails=1";
+  constructor() { 
+  }
+
+  fetchData(bankname: string, cityname: string): Promise<Array<IAPIResult>> {
+    let query = `q='${bankname},${cityname}`;
+    return fetch(this.url + '&' + query)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+        return response.json() as Promise<Array<IAPIResult>>;
+      });
+  }
+}
+
+export class Presenter {
+  viewModel: ViewModel;
+  constructor(apiResult: IAPIResult) {
+    this.viewModel = this.mapAPIResultToModel(apiResult);
+  }
+  mapAPIResultToModel(apiResult: IAPIResult): ViewModel {
+    let bankname = apiResult.address.amenity;
+    let bank = new Bank(apiResult.address.country_code, bankname);
+    return {
+      bank: apiResult.address.amenity,
+      country: apiResult.address.country,
+      city: apiResult.address.city,
+      road: apiResult.address.road,
+      bankIconURL: bank.bankIconURL,
+      countryIconURL: bank.countryIconURL,
+      display_name: apiResult.display_name
+    } as ViewModel;
+  }
+}
+

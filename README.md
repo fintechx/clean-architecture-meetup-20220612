@@ -27,3 +27,7 @@ Amire a jövőben számítani lehet, hogy változni fog:
 0. Feladat - Funkcionális teszt lefedettség
 - A viewModel architektúrának köszönhetően elég az app viewModelljeinek állapotát vizsgálni, de jelenleg csak 1 search van lefedve teszttel.
 - A további 5 search-öt is érdemes lefedni integrációs teszttel, ezzel biztosítható lesz, hogy a refaktoroknál nem fognak eltörni.
+
+1. Feladat: Single Responsibility Principle
+- Kik az aktorok, akiktől jöhetnek a változtatási kérések? CTO és UX Team.
+- Ezek szerint érdemes szétválasztani a prezentációs és az adatlekérési logikát. (Presenter, DataFetcher)

@@ -38,3 +38,7 @@ Amire a jövőben számítani lehet, hogy változni fog:
 - Szintén vezessünk be öröklést a Bank fetchelésre (BankFetcher), amiből a CIB-es kivételkezelést (CIBFetcher osztály) leszármaztatjuk.
 - A DataFetcher is osztályt próbáljuk egy általános abtract osztályt készíteni, ha esetleg más query-t kell használni később, nem csak a bank, city jellegűt, akkor ebből is tudjunk más Fetcher osztályokat származtatni.
 - A jövőben bármilyen új bank jön, akkor tudjuk a BankFetcher osztályunkat használni, vagy pedig a CIBFetcher-hez hasonló kivételkezelést készíteni.
+
+3. Feladat: Liskov Substitution Principle
+- Sajnos a CIB esetén van egy architekturális LSV sértésünk, mert a Nominatim API mindenképp másképp működik a CIB kereséssel Szlovákiára, ha meg akarjuk keresni a helyi CIB-et, akkor VUB keresőszóval kell keressünk. Itt vagy a UX csapatnak kellene a Nominatim kereséshez alkalmazkodnia és külön bankként kezelni a VUB-ot, vagy a Nominatim API-nak kellene megtalálnia a VUB-ot is a CIB keresőszóval. Egyelőre ettől az ellentmondástól nem tudunk megszabadulni, de legalább külön osztályba szerveztük ezt a kivételt, hogy az Open-Closed Principle szerint az alap működésünket ne zavarja. 
+

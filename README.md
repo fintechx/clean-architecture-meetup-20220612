@@ -42,3 +42,8 @@ Amire a jövőben számítani lehet, hogy változni fog:
 3. Feladat: Liskov Substitution Principle
 - Sajnos a CIB esetén van egy architekturális LSV sértésünk, mert a Nominatim API mindenképp másképp működik a CIB kereséssel Szlovákiára, ha meg akarjuk keresni a helyi CIB-et, akkor VUB keresőszóval kell keressünk. Itt vagy a UX csapatnak kellene a Nominatim kereséshez alkalmazkodnia és külön bankként kezelni a VUB-ot, vagy a Nominatim API-nak kellene megtalálnia a VUB-ot is a CIB keresőszóval. Egyelőre ettől az ellentmondástól nem tudunk megszabadulni, de legalább külön osztályba szerveztük ezt a kivételt, hogy az Open-Closed Principle szerint az alap működésünket ne zavarja. 
 
+4. Feladat: Interface Segregation Principle
+- A két UI komponens között a viewModel közös, ezt az összefüggést érdemes megszüntetni. Ezáltal a Prezentációs logikánk is jobban szétválik majd, könnyebben tudjuk a módosításokat követni, ha csak az egyik UI komponensre kérik őket.
+- Válasszuk szét a viewModel interfészt is terminalModel és widgetModel interfészekre és csak a számukra releváns mezőket hagyjuk meg.
+- Készítsünk egy TerminalPresenter és egy WidgetPresenter osztályt, úgy hogy a korábbi Presenter osztályt tartsuk meg absztrakt osztályként, a mapAPIResultToModel függvényét absztrakt függvényként. A TerminalPresenter és a WidgetPresenter osztályok tárolják a saját adataikat egy-egy saját viewModel mezőben, ezeken végezzenek műveleteket.
+

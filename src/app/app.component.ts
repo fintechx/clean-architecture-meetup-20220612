@@ -16,18 +16,8 @@ export class AppComponent {
     else dataFetcher = new BankFetcher(bank, city);
     let data = await dataFetcher.fetchData();
     let apiResult = data[0];
-    let viewModel = new Presenter(apiResult).viewModel;
-    this.terminalModel = {
-      bank: viewModel.bank,
-      country: viewModel.country,
-      city: viewModel.city,
-      road: viewModel.road
-    };
-    this.widgetModel = {
-      bankIconURL: viewModel.bankIconURL,
-      countryIconURL: viewModel.countryIconURL,
-      display_name: viewModel.display_name
-    };
+    this.terminalModel = new TerminalPresenter(apiResult).viewModel;
+    this.widgetModel = new WidgetPresenter(apiResult).viewModel;
   }
 }
 
@@ -120,12 +110,41 @@ export class CIBFetcher extends BankFetcher {
 }
 
 
-export class Presenter {
-  viewModel: ViewModel;
+export abstract class Presenter {
+  viewModel: any;
   constructor(apiResult: IAPIResult) {
     this.viewModel = this.mapAPIResultToModel(apiResult);
   }
-  mapAPIResultToModel(apiResult: IAPIResult): ViewModel {
+  abstract mapAPIResultToModel(apiResult: IAPIResult): any;
+}
+
+export interface TerminalModel {
+    bank: string,
+    country: string,
+    city: string,
+    road: string
+}  
+
+export class TerminalPresenter extends Presenter {
+  mapAPIResultToModel(apiResult: IAPIResult): TerminalModel {
+    return {
+      bank: apiResult.address.amenity,
+      country: apiResult.address.country,
+      city: apiResult.address.city,
+      road: apiResult.address.road
+    } as TerminalModel;
+  }
+
+}
+
+export interface WidgetModel {
+  bankIconURL: string,
+  countryIconURL: string,
+  display_name: string
+}
+
+export class WidgetPresenter extends Presenter {
+  mapAPIResultToModel(apiResult: IAPIResult): WidgetModel {
     let bankname = apiResult.address.amenity;
     let bank: Bank;
     switch (bankname) {
@@ -140,14 +159,11 @@ export class Presenter {
     }
 
     return {
-      bank: apiResult.address.amenity,
-      country: apiResult.address.country,
-      city: apiResult.address.city,
-      road: apiResult.address.road,
       bankIconURL: bank.bankIconURL,
       countryIconURL: bank.countryIconURL,
       display_name: apiResult.display_name
-    } as ViewModel;
+    } as WidgetModel;
   }
 }
+
 
